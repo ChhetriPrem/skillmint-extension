@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "github_repo",
       "github_prNumber",
       "github_url",
+      "githubUsername",
     ],
     (data) => {
       // Display wallet info
@@ -153,12 +154,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle badge minting
   mintForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    setMintStatus("⏳ Minting...", "loading");
+    setMintStatus(" Minting...", "loading");
     mintForm.querySelector('button[type="submit"]').disabled = true;
 
     // Get latest wallet address, GitHub username, and PR link
     chrome.storage.local.get(
-      ["wallet_address", "github_owner", "github_url"],
+      ["wallet_address", "github_owner", "github_url", "githubUsername"],
       async (data) => {
         const badgeName = badgeNameInput.value;
         const templateName = templateSelect.value;
@@ -176,14 +177,14 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
         if (!templateName) {
-          setMintStatus(" Please select a template.", "error");
+          setMintStatus("Please select a template.", "error");
           mintForm.querySelector('button[type="submit"]').disabled = false;
           return;
         }
 
         try {
           const uniqueSeed = Date.now();
-          setMintStatus(" Sending mint request...", "loading");
+          setMintStatus("Sending mint request...", "loading");
           console.log(badgeName);
           const response = await fetch(
             "https://skillmint-lyart.vercel.app/api/mint-badge-ex",
@@ -195,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 templateName,
                 receiver,
                 receiverGithub,
-                reviewer: "You",
+                reviewer: data.githubUsername,
                 prLink: pr,
                 level,
                 uniqueSeed,
@@ -216,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setMintStatus(` ${respData.error || "Mint failed"}`, "error");
           }
         } catch (err) {
-          setMintStatus(` ${err.message}`, "error");
+          setMintStatus(`${err.message}`, "error");
         }
         mintForm.querySelector('button[type="submit"]').disabled = false;
       }
